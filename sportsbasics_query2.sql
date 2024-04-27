@@ -1,13 +1,13 @@
 SELECT * FROM sports_basics.dim_match_summary;
 select * ,extract(year from matchDate) as season
 from dim_match_summary join fact_bating_summary using(match_id);
--- Query 1
+-- Query 1 TOP 10 BATSMAN BASED ON RUN
 select Batsmanname,sum(runs) as total_run
 from fact_bating_summary
 group by 1
 order by 2 desc;
 
--- query 2
+-- query 2TOP 10 BATSMAN BASED ON AVERAGE BATTING .
 with cte as(select *,extract(year from matchdate) season from fact_bating_summary 
 join dim_match_summary using(match_id)),
 cte2 as(select batsmanName,season,sum(runs) run_season_wise,sum(balls) as ball_faced,
@@ -22,7 +22,7 @@ having count(*)=3
 order by average_batting desc
 limit 10;
 
--- query 3
+-- query 3 TOP 10 BATSMAN BASED ON STRIKE RATE
 with cte as(select *,extract(year from matchdate) season from fact_bating_summary 
 join dim_match_summary using(match_id)),
 cte2 as(select batsmanName,season,sum(runs) run_season_wise,sum(balls) as ball_faced
@@ -38,7 +38,7 @@ limit 30;
 
 
 
--- query 4
+-- query 4 TOP 10 BOWLER ON BASED OF HIGHEST WICKET
 SELECT * FROM sports_basics.fact_bowling_summary;
 select bowlerName,sum(wickets) as total_wicket
 from fact_bowling_summary
@@ -47,7 +47,7 @@ order by 2 desc
 limit 10;
 
 
--- query 5
+-- query 5 TOP 10 BOWLER BASED ON BOWLING AVERAGE
 with cte as(SELECT * ,extract(year from matchDate) as season 
 FROM sports_basics.fact_bowling_summary
 join dim_match_summary using (match_id)),
@@ -64,7 +64,7 @@ from cte3
 order by bowling_avg asc
 limit 10;
 
--- query 6
+-- query 6 TOP 10 BOWLER BASED ON ECONOMY RATE
 with cte as(SELECT * ,(overs*6) as tot_balls,extract(year from matchDate) as season 
 FROM sports_basics.fact_bowling_summary
 join dim_match_summary using (match_id)),
@@ -79,7 +79,7 @@ having count(*)=3
 order by economy_rate 
 limit 10;
 
--- query 7
+-- query 7 TOP 5 BATSMAN BASED ON BOUNDRY%
 with cte as(SELECT batsmanname,(sum(runs)) as total_runs,(sum(4s*4)+sum(6s*6)) as total_boundaries,sum(balls) balls_faced,
 extract(year from matchdate) as season
 from fact_bating_summary join dim_match_summary using(match_id)
@@ -94,7 +94,7 @@ group by batsmanname
 order by 2 desc
 limit 5;
 
--- query 8
+-- query 8 TOP 5 BOWLERS BASED ON DOT BALL PERCENTAGE
 with cte as (select  bowlername,extract(year from matchdate) as season,
 sum(overs*6) total_deliveries ,sum(0s)as dot_ball
 from fact_bowling_summary join dim_match_summary using(match_id)
@@ -107,7 +107,7 @@ having count(*)=3
 order by dot_percentage desc
 limit 5;
 
--- query 9
+-- query 9 TOP 4 TEAMS BASED ON 3 YEAR WINNING PERCENTAGE
 with cte as(select team1,extract(year from matchdate) season
 from dim_match_summary
 union all
@@ -131,7 +131,7 @@ from cte3 join cte5 on cte3.team1=cte5.winner
 order by winning_per desc
 limit 4;
 
--- query 10
+-- query 10 TOP 2 TEAMS WITH HIGHEST NUMBER OF WIN ACHIEVED BY CHASING TARGETS OVER PAST 3 YEARS.
 select winner, sum(case when team2=winner then 1 else 0 end ) win
 from dim_match_summary
 group by winner
